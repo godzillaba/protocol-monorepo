@@ -1,0 +1,10 @@
+{
+    "network": "fuji",
+    "hostStartBlock": 2469246,
+    "hostAddress": "0xb1Cb9e86Fe1E6B45F44A3D90ed08E71403D6fA36",
+    "cfaAddress": "0x2Faf53cf40C5ffBb0bf4EDAd0F896184B255b573",
+    "idaAddress": "0xDcD9Ec65f69a78E51d93e472eaC6b60f12758719",
+    "superTokenFactoryAddress": "0xc38456Cfbb07b02dcAA282c08C89F764341D967a",
+    "superfluidGovernanceAddress": "0xB2D896A6c7dAB6aDfb4021885500226F3278e1D6",
+    "resolverV1Address": "0xb76d7c14caD40Cc434655Ce0a9B5b49220C362cA"
+}
