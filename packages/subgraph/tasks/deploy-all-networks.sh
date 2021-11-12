@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo $1
-
 JQ="../../node_modules/node-jq/bin/jq"
 mustache="../../node_modules/mustache/bin/mustache"
 graph="../../node_modules/@graphprotocol/graph-cli"

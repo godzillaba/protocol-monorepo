@@ -22,8 +22,11 @@
         "set-network:feature:matic": "mustache config/matic.json src/addresses.template.ts > src/addresses.ts",
         "deploy:feature:matic": "yarn prepare:feature:matic && yarn set-network:feature:matic && SUBGRAPH_NAME=superfluid-finance/protocol-feature-matic yarn deploy",
         "deploy-all-networks": "./tasks/deploy-all-networks.sh",
-        "deploy-dev": "yarn deploy-all-networks dev",
-        "deploy-v1": "yarn deploy-all-networks v1",
+        "deploy-all-dev": "yarn deploy-all-networks dev",
+        "deploy-all-v1": "yarn deploy-all-networks v1",
+        "deploy-to-network": "./tasks/deploy.sh",
+        "deploy-to-dev-network": "./tasks/deploy.sh dev",
+        "deploy-to-v1-network": "./tasks/deploy.sh v1",
         "lint": "run-s lint:*",
         "lint:js-eslint": "eslint . --max-warnings=0 --report-unused-disable-directives --fix && echo '✔  Your .js files look good.'",
         "pre-commit": "true"
