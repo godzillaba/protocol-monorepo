@@ -10,7 +10,7 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     const superTokenAddress = '0x55D77E4307A9Df1D9af4499D62251130e21F0A1A';
     const superFluidAddress = '0xb56cfb24Bf3E54f1A267858aDA2B1b64B9F65193';
     const cfaAddress = '0x0245FD96803FB2172F7Fd40e1340a625B722b26E';
-    const tcfAddress = '0x52b49a7098DB3554bd31A5DD735E28D85A8B95a8';
+    const tcfAddress = '0xae721976396923beCeBfE79dD6AbAf1228BBeF85';
 
     const [, alice, bob, chuck, dave] = accounts;
     let sf;
@@ -41,6 +41,7 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
         return;
         const x = await TradeableCashflow.new(bob, 'Holy Grail', 'GRAIL', superFluidAddress, cfaAddress, superTokenAddress, bob)
         console.log(x.address);
+        process.exit();
     })
 
     it("mint nft to chuck", async () => {
@@ -82,13 +83,9 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
         console.log(flow)
     })
 
-    it("alice sends telx directly to superapp", async () => {
-        // return;
-        await telxContract.transfer(tcfAddress, 1e10+'', {from: alice});
-    })
-
     it("Alice creates flow to superapp", async () => {
         // return;
+        await telxContract.transfer(tcfAddress, 1e10+'', {from: alice});
         const userAlice = await sf.user({
             address: alice,
             token: superTokenAddress
@@ -115,6 +112,16 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
         console.log('superapp', await telxContract.balanceOf(tcfAddress)-0)
     })
 
+    
+
+    it("transfer NFT from chuck to dave", async () => {
+        // return;
+        let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
+        await tradeableCashflow.transferFrom(chuck, dave, 2, {from: chuck});
+    })
+
+    
+
     it("check nft balance", async () => {
         return;
         let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
@@ -123,19 +130,14 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
         console.log('dave nft', await tradeableCashflow.balanceOf(dave)-0);
     })
 
-    it("transfer NFT from chuck to dave", async () => {
-        // return;
-        let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
-        await tradeableCashflow.transferFrom(chuck, dave, 2, {from: chuck});
-    })
-
     it("mint NFT to dave", async () => {
         return;
         let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
-        await tradeableCashflow.mint(dave, 3, {from: dave});
+        await tradeableCashflow.mint(alice, 3, {from: alice});
+        await tradeableCashflow.transferFrom(alice, dave, 3, {from: alice});
     })
 
-    it("Alice deletes flow to superapp", async () => {
+    it("Alice updates flow to superapp", async () => {
         return;
         const userAlice = await sf.user({
             address: alice,
@@ -146,25 +148,16 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
         
         const flow = await userAlice.flow({
             recipient: tcfAddress,
-            flowRate: '0'//ethers.BigNumber.from(1e16+'').div(ethers.BigNumber.from(60*60*24))-0+'',
+            flowRate: '15'//ethers.BigNumber.from(1e16+'').div(ethers.BigNumber.from(60*60*24))-0+'',
 
         })
     })
 
-    it("Alice reduces flow to superapp", async () => {
-        return;
-        const userAlice = await sf.user({
-            address: alice,
-            token: superTokenAddress
-        })
-        // console.log((await userAlice.details()).cfa.flows.outFlows)
+    it("check outflow", async() => {
         // return;
-        
-        const flow = await userAlice.flow({
-            recipient: tcfAddress,
-            flowRate: '5'//ethers.BigNumber.from(1e16+'').div(ethers.BigNumber.from(60*60*24))-0+'',
-
-        })
+        let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
+        console.log('bob', await tradeableCashflow.getOutflowRate(1)-0);
+        console.log('dave', await tradeableCashflow.getOutflowRate(3)-0);
     })
 
     it("Check telx balances", async() => {

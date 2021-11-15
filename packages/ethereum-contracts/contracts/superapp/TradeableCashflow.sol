@@ -74,6 +74,14 @@ contract TradeableCashflow is ERC721, SuperAppBase {
     //     }
     // }
 
+    function getOutflowRate(uint256 tokenId) public view returns (int96) {
+        (, int96 outFlowRate, , ) = _cfa.getFlow(
+            _acceptedToken,
+            address(this),
+            ownerOf(tokenId)
+        );
+        return outFlowRate;
+    }
 
     event ReceiverChanged(address oldRec, address newRec); //what is this?
 
@@ -83,6 +91,31 @@ contract TradeableCashflow is ERC721, SuperAppBase {
         returns (bytes memory newCtx)
     {
         newCtx = ctx;
+
+        for (uint256 i = 0; i < totalSupply(); i++) {
+            (, int96 ofr, , ) = _cfa.getFlow(
+                _acceptedToken,
+                address(this),
+                ownerOf(i+1)
+            );
+
+            if (ofr != int96(0)) {
+                (newCtx, ) = _host.callAgreementWithContext(
+                    _cfa,
+                    abi.encodeWithSelector(
+                        _cfa.deleteFlow.selector,
+                        _acceptedToken,
+                        address(this),
+                        ownerOf(i+1),
+                        new bytes(0) // placeholder
+                    ),
+                    "0x",
+                    newCtx
+                );
+            }
+        }
+
+
         // @dev This will give me the new flowRate, as it is called in after callbacks
         int96 netFlowRate = _cfa.getNetFlow(_acceptedToken, address(this));         
 
@@ -99,20 +132,21 @@ contract TradeableCashflow is ERC721, SuperAppBase {
         // @dev If inFlowRate === 0, then delete existing flow.
         if (inFlowRate < int96(totalSupply())) { 
             // @dev if inFlowRate is zero, delete outflow.
-            for (uint256 i = 0; i < totalSupply(); i++) {
-                (newCtx, ) = _host.callAgreementWithContext(
-                    _cfa,
-                    abi.encodeWithSelector(
-                        _cfa.deleteFlow.selector,
-                        _acceptedToken,
-                        address(this),
-                        ownerOf(i+1),
-                        new bytes(0) // placeholder
-                    ),
-                    "0x",
-                    newCtx
-                );
-            }
+            return newCtx;
+            // for (uint256 i = 0; i < totalSupply(); i++) {
+            //     (newCtx, ) = _host.callAgreementWithContext(
+            //         _cfa,
+            //         abi.encodeWithSelector(
+            //             _cfa.deleteFlow.selector,
+            //             _acceptedToken,
+            //             address(this),
+            //             ownerOf(i+1),
+            //             new bytes(0) // placeholder
+            //         ),
+            //         "0x",
+            //         newCtx
+            //     );
+            // }
         } else if (outFlowRate != int96(0)) {
             for (uint256 i = 0; i < totalSupply(); i++) {
                 (newCtx, ) = _host.callAgreementWithContext(
