@@ -17,6 +17,8 @@ export interface IEvent {
     readonly id: string;
     readonly transactionHash: string;
     readonly blockNumber: string;
+    readonly name: string;
+    readonly addresses: string[];
     readonly timestamp: string;
 }
 
@@ -165,10 +167,12 @@ export interface IAccount extends IBaseEntity {
 }
 
 export interface IToken extends IBaseEntity {
+    readonly decimals: number;
     readonly name: string;
     readonly symbol: string;
     readonly underlyingAddress: string;
     readonly isListed: boolean;
+    readonly underlyingToken: ILightEntity | null;
 }
 
 export interface IStream extends IBaseEntity {
@@ -496,6 +500,7 @@ export interface IExpectedFlowUpdateEvent {
     readonly oldFlowRate: string;
     readonly receiver: string;
     readonly sender: string;
+    readonly addresses: string[];
     readonly token: string;
     readonly totalAmountStreamedUntilTimestamp: string;
     readonly totalReceiverFlowRate: string;
