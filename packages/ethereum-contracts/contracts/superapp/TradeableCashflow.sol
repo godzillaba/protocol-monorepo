@@ -18,7 +18,6 @@ contract TradeableCashflow is ERC721, SuperAppBase {
     ISuperfluid private _host; // host
     IConstantFlowAgreementV1 private _cfa; // the stored constant flow agreement class address
     ISuperToken private _acceptedToken; // accepted token
-    address private _receiver; // NOTE: SHOULD BE ARRAY OR SOMETHING
 
     constructor(
         address owner,
@@ -35,13 +34,12 @@ contract TradeableCashflow is ERC721, SuperAppBase {
             address(acceptedToken) != address(0),
             "acceptedToken is zero address"
         );
-        require(address(receiver) != address(0), "receiver is zero address");
-        require(!host.isApp(ISuperApp(receiver)), "receiver is an app");
+        require(address(owner) != address(0), "receiver/owner is zero address");
+        require(!host.isApp(ISuperApp(owner)), "receiver/owner is an app");
 
         _host = host;
         _cfa = cfa;
         _acceptedToken = acceptedToken;
-        _receiver = receiver;
 
         uint256 configWord = SuperAppDefinitions.APP_LEVEL_FINAL |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP |
@@ -57,27 +55,27 @@ contract TradeableCashflow is ERC721, SuperAppBase {
      * Redirect Logic
      *************************************************************************/
 
-    function currentReceiver()
-        external
-        view
-        returns (
-            uint256 startTime,
-            address receiver,
-            int96 flowRate
-        )
-    {
-        if (_receiver != address(0)) {
-            (startTime, flowRate, , ) = _cfa.getFlow(
-                _acceptedToken,
-                address(this),
-                _receiver
-            );
-            receiver = _receiver;
-        }
-    }
+    // function currentReceiver()
+    //     external
+    //     view
+    //     returns (
+    //         uint256 startTime,
+    //         address receiver,
+    //         int96 flowRate
+    //     )
+    // {
+    //     if (_receiver != address(0)) {
+    //         (startTime, flowRate, , ) = _cfa.getFlow(
+    //             _acceptedToken,
+    //             address(this),
+    //             _receiver
+    //         );
+    //         receiver = _receiver;
+    //     }
+    // }
 
 
-    event ReceiverChanged(address receiver); //what is this?
+    event ReceiverChanged(address oldRec, address newRec); //what is this?
 
     /// @dev If a new stream is opened, or an existing one is opened
     function _updateOutflow(bytes calldata ctx)
@@ -86,26 +84,20 @@ contract TradeableCashflow is ERC721, SuperAppBase {
     {
         newCtx = ctx;
         // @dev This will give me the new flowRate, as it is called in after callbacks
-        int96 netFlowRate = _cfa.getNetFlow(_acceptedToken, address(this)); 
-
-        // NOTE: START LOOP OVER RECEIVERS HERE
-        
-
-        address nftHolder = ownerOf(1);
-
+        int96 netFlowRate = _cfa.getNetFlow(_acceptedToken, address(this));         
 
         (, int96 outFlowRate, , ) = _cfa.getFlow(
             _acceptedToken,
             address(this),
-            nftHolder
+            ownerOf(1)
         ); // CHECK: unclear what happens if flow doesn't exist.
 
-        outFlowRate *= 2; // NOTE: hardcoded
+        outFlowRate *= int96(totalSupply());
 
         int96 inFlowRate = netFlowRate + outFlowRate;
 
         // @dev If inFlowRate === 0, then delete existing flow.
-        if (inFlowRate < 2) { // NOTE: hardcoded
+        if (inFlowRate < int96(totalSupply())) { 
             // @dev if inFlowRate is zero, delete outflow.
             for (uint256 i = 0; i < totalSupply(); i++) {
                 (newCtx, ) = _host.callAgreementWithContext(
@@ -129,7 +121,7 @@ contract TradeableCashflow is ERC721, SuperAppBase {
                         _cfa.updateFlow.selector,
                         _acceptedToken,
                         ownerOf(i+1),
-                        inFlowRate/2, // hardcoded
+                        inFlowRate/int96(totalSupply()),
                         new bytes(0) // placeholder
                     ),
                     "0x",
@@ -145,7 +137,7 @@ contract TradeableCashflow is ERC721, SuperAppBase {
                         _cfa.createFlow.selector,
                         _acceptedToken,
                         ownerOf(i+1),
-                        inFlowRate/2, // hardcoded
+                        inFlowRate/int96(totalSupply()),
                         new bytes(0) // placeholder
                     ),
                     "0x",
@@ -156,19 +148,19 @@ contract TradeableCashflow is ERC721, SuperAppBase {
     }
 
     // @dev Change the Receiver of the total flow
-    function _changeReceiver(address newReceiver) internal { // NOTE: ADD OLDRECEIVER ARG
+    function _changeReceiver(address oldReceiver, address newReceiver) internal {
         require(newReceiver != address(0), "New receiver is zero address");
         // @dev because our app is registered as final, we can't take downstream apps
         require(
             !_host.isApp(ISuperApp(newReceiver)),
             "New receiver can not be a superApp"
         );
-        if (newReceiver == _receiver) return; // NOTE: change to oldRec==newRec || oldRec not in receivers || newRec is in receivers (should maybe revert on those last 2 conditions) (what if one address holds 2 nfts?)
+        if (newReceiver == oldReceiver) return; // NOTE: change to oldRec==newRec || oldRec not in receivers || newRec is in receivers (should maybe revert on those last 2 conditions) (what if one address holds 2 nfts?)
         // @dev delete flow to old receiver
         (, int96 outFlowRate, , ) = _cfa.getFlow(
             _acceptedToken,
             address(this),
-            _receiver
+            oldReceiver
         ); //CHECK: unclear what happens if flow doesn't exist.
         if (outFlowRate > 0) {
             _host.callAgreement(
@@ -177,7 +169,7 @@ contract TradeableCashflow is ERC721, SuperAppBase {
                     _cfa.deleteFlow.selector,
                     _acceptedToken,
                     address(this),
-                    _receiver, // NOTE: HERE
+                    oldReceiver,
                     new bytes(0)
                 ),
                 "0x"
@@ -189,16 +181,14 @@ contract TradeableCashflow is ERC721, SuperAppBase {
                     _cfa.createFlow.selector,
                     _acceptedToken,
                     newReceiver,
-                    _cfa.getNetFlow(_acceptedToken, address(this)),
+                    outFlowRate,
                     new bytes(0)
                 ),
                 "0x"
             );
         }
-        // @dev set global receiver to new receiver
-        _receiver = newReceiver;
-
-        emit ReceiverChanged(_receiver);
+        
+        emit ReceiverChanged(oldReceiver, newReceiver);
     }
 
     /**************************************************************************
@@ -297,14 +287,15 @@ contract TradeableCashflow is ERC721, SuperAppBase {
 
     //now I will insert a nice little hook in the _transfer, including the RedirectAll function I need
     function _beforeTokenTransfer(
-        address, /*from*/
+        address from, /*from*/
         address to,
         uint256 /*tokenId*/
     ) internal override {
-        _changeReceiver(to);
+        _changeReceiver(from, to);
     }
 
     function mint(address to, uint256 tokenId) external {
+        require(int96(totalSupply()+1) > 0, "cannot exceed int96");
         _mint(to, tokenId);
     }
 }
