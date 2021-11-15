@@ -86,7 +86,7 @@ contract TradeableCashflow is ERC721, SuperAppBase {
     {
         newCtx = ctx;
         // @dev This will give me the new flowRate, as it is called in after callbacks
-        int96 netFlowRate = _cfa.getNetFlow(_acceptedToken, address(this))/2; // NOTE: hardcoded
+        int96 netFlowRate = _cfa.getNetFlow(_acceptedToken, address(this)); 
 
         // NOTE: START LOOP OVER RECEIVERS HERE
         
@@ -99,62 +99,59 @@ contract TradeableCashflow is ERC721, SuperAppBase {
             address(this),
             nftHolder
         ); // CHECK: unclear what happens if flow doesn't exist.
+
+        outFlowRate *= 2; // NOTE: hardcoded
+
         int96 inFlowRate = netFlowRate + outFlowRate;
 
         // @dev If inFlowRate === 0, then delete existing flow.
-        if (inFlowRate == int96(0)) {
+        if (inFlowRate < 2) { // NOTE: hardcoded
             // @dev if inFlowRate is zero, delete outflow.
-            (newCtx, ) = _host.callAgreementWithContext(
-                _cfa,
-                abi.encodeWithSelector(
-                    _cfa.deleteFlow.selector,
-                    _acceptedToken,
-                    address(this),
-                    nftHolder,
-                    new bytes(0) // placeholder
-                ),
-                "0x",
-                newCtx
-            );
+            for (uint256 i = 0; i < totalSupply(); i++) {
+                (newCtx, ) = _host.callAgreementWithContext(
+                    _cfa,
+                    abi.encodeWithSelector(
+                        _cfa.deleteFlow.selector,
+                        _acceptedToken,
+                        address(this),
+                        ownerOf(i+1),
+                        new bytes(0) // placeholder
+                    ),
+                    "0x",
+                    newCtx
+                );
+            }
         } else if (outFlowRate != int96(0)) {
-            (newCtx, ) = _host.callAgreementWithContext(
-                _cfa,
-                abi.encodeWithSelector(
-                    _cfa.updateFlow.selector,
-                    _acceptedToken,
-                    nftHolder,
-                    inFlowRate,
-                    new bytes(0) // placeholder
-                ),
-                "0x",
-                newCtx
-            );
+            for (uint256 i = 0; i < totalSupply(); i++) {
+                (newCtx, ) = _host.callAgreementWithContext(
+                    _cfa,
+                    abi.encodeWithSelector(
+                        _cfa.updateFlow.selector,
+                        _acceptedToken,
+                        ownerOf(i+1),
+                        inFlowRate/2, // hardcoded
+                        new bytes(0) // placeholder
+                    ),
+                    "0x",
+                    newCtx
+                );
+            }
         } else {
             // @dev If there is no existing outflow, then create new flow to equal inflow
-            (newCtx, ) = _host.callAgreementWithContext(
-                _cfa,
-                abi.encodeWithSelector(
-                    _cfa.createFlow.selector,
-                    _acceptedToken,
-                    nftHolder,
-                    inFlowRate,
-                    new bytes(0) // placeholder
-                ),
-                "0x",
-                newCtx
-            );
-            (newCtx, ) = _host.callAgreementWithContext(
-                _cfa,
-                abi.encodeWithSelector(
-                    _cfa.createFlow.selector,
-                    _acceptedToken,
-                    ownerOf(2),
-                    inFlowRate,
-                    new bytes(0) // placeholder
-                ),
-                "0x",
-                newCtx
-            );
+            for (uint256 i = 0; i < totalSupply(); i++) {
+                (newCtx, ) = _host.callAgreementWithContext(
+                    _cfa,
+                    abi.encodeWithSelector(
+                        _cfa.createFlow.selector,
+                        _acceptedToken,
+                        ownerOf(i+1),
+                        inFlowRate/2, // hardcoded
+                        new bytes(0) // placeholder
+                    ),
+                    "0x",
+                    newCtx
+                );
+            }
         }
     }
 
