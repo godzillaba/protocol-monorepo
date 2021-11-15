@@ -266,8 +266,9 @@ module.exports = {
         /// For truffle development environment
         development: {
             host: "localhost",
-            port: 47545,
-            network_id: "4447",
+            port: 8545,
+            network_id: "*",
+            gas: 50000000, gasLimit: 0x1fffffffffffff,
 
             // workaround to improve testing speed
             // see https://github.com/trufflesuite/truffle/issues/3522

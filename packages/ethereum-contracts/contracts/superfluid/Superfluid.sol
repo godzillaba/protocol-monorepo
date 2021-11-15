@@ -288,9 +288,9 @@ contract Superfluid is
         external override
     {
         // check if whitelisting required
-        if (APP_WHITE_LISTING_ENABLED) {
-            revert("SF: app registration requires permission");
-        }
+        // if (APP_WHITE_LISTING_ENABLED) {
+        //     revert("SF: app registration requires permission");
+        // }
         _registerApp(configWord, ISuperApp(msg.sender), true);
     }
 
