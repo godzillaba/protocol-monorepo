@@ -6,11 +6,11 @@ const ethers = require('ethers')
 const timeMachine = require('ganache-time-traveler');
 
 contract("Scenario: Bob flows to Alice", (accounts) => {
-    const tokenAddress = '0x2ab9Dd79973ef6e92441C366f9018bCB51eD14Bf';
-    const superTokenAddress = '0x7ea00bC4534e5bCb3fA29D90957BC88C51C0A554';
-    const superFluidAddress = '0x9f823396Ffe5375930A3Ac0B7f4B4Baa098d9522';
-    const cfaAddress = '0x8B1efAb28a90510399115f81f00e93ad8f75B542';
-    const tcfAddress = '0x76BC0aB6749dE247D490feF907A9087a4d640A81';
+    const tokenAddress = '0xaf0c3D756a9BE93c8C2ccB1dd4DDDD6eB0aD162A';
+    const superTokenAddress = '0x83f8cb4e9901c69D638A4AeF60f533149C459C2a';
+    const superFluidAddress = '0x693F0A7ddE866C48D69e7C062e6C9A769f4bf649';
+    const cfaAddress = '0xa56bdc9C2e358e41F1005bCE1D04e6437ea4272A';
+    const tcfAddress = '0x21ecE326206bB9119936978BA51f5826c7871550';
 
     const [, alice, bob, chuck, dave] = accounts;
     let sf;
@@ -39,7 +39,7 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
 
     it("deploy superapp", async () => {
         return;
-        const x = await TradeableCashflow.new(bob, 'Holy Grail', 'GRAIL', superFluidAddress, cfaAddress, superTokenAddress, bob)
+        const x = await TradeableCashflow.new(bob, 'Holy Grail', 'GRAIL', superFluidAddress, cfaAddress, superTokenAddress, bob, {from: alice})
         console.log(x.address);
         process.exit();
     })
@@ -47,8 +47,8 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     it("mint nfts to initial holders", async () => {
         // return;
         let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
-        await tradeableCashflow.mint(bob, 1, {from: bob});
-        await tradeableCashflow.mint(chuck, 2, {from: chuck});
+        await tradeableCashflow.mint(bob, 1, {from: alice});
+        await tradeableCashflow.mint(chuck, 2, {from: alice});
     })
     
     it("mint TEL to alice", async () => {
@@ -116,22 +116,23 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     
 
     it("transfer NFT from chuck to dave", async () => {
-        return;
+        // return;
         let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
-        await tradeableCashflow.transferFrom(chuck, dave, 2, {from: chuck});
+        await tradeableCashflow.transferFrom(chuck, dave, 2, {from: alice});
     })
 
     it("mint NFTs during stream", async () => {
         return;
         let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
-        await tradeableCashflow.mint(dave, 3, {from: dave});
+        await tradeableCashflow.mint(dave, 3, {from: alice});
         // await tradeableCashflow.transferFrom(alice, dave, 3, {from: alice});
     })
 
     it("burn NFTs during stream", async () => {
-        // return;
+        return;
         let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
-        await tradeableCashflow.burn(1, {from: dave});
+        await tradeableCashflow.burn(1, {from: alice});
+        console.log(await tradeableCashflow.totalSupply());
     })
 
     

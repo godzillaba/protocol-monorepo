@@ -2,8 +2,10 @@
 pragma solidity ^0.7.0;
 
 import {RedirectAll, ISuperToken, IConstantFlowAgreementV1, ISuperfluid} from "./RedirectAll.sol";
+import {CouncilNFT} from "./CouncilNFT.sol";
 
-import {ERC721, IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+// import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol";
 
 import {ISuperfluid, ISuperToken, ISuperApp, ISuperAgreement, ContextDefinitions, SuperAppDefinitions} from "../interfaces/superfluid/ISuperfluid.sol";
 
@@ -14,7 +16,7 @@ import {IConstantFlowAgreementV1} from "../interfaces/agreements/IConstantFlowAg
 
 import {SuperAppBase} from "../apps/SuperAppBase.sol";
 
-contract TradeableCashflow is IERC721Enumerable, SuperAppBase, ERC721 {
+contract TradeableCashflow is SuperAppBase, CouncilNFT {
     ISuperfluid private _host; // host
     IConstantFlowAgreementV1 private _cfa; // the stored constant flow agreement class address
     ISuperToken private _acceptedToken; // accepted token
@@ -27,7 +29,7 @@ contract TradeableCashflow is IERC721Enumerable, SuperAppBase, ERC721 {
         IConstantFlowAgreementV1 cfa,
         ISuperToken acceptedToken,
         address receiver
-    ) ERC721(_name, _symbol) {
+    ) CouncilNFT(_name, _symbol) {
         require(address(host) != address(0), "host is zero address");
         require(address(cfa) != address(0), "cfa is zero address");
         require(
@@ -237,14 +239,14 @@ contract TradeableCashflow is IERC721Enumerable, SuperAppBase, ERC721 {
         _updateOutflowNoContext();
     }
 
-    function mint(address to, uint256 tokenId) external {
-        require(int96(totalSupply()+1) > 0, "cannot exceed int96");
-        _mint(to, tokenId);
-    }
+    // function mint(address to, uint256 tokenId) external {
+    //     require(int96(totalSupply()+1) > 0, "cannot exceed int96");
+    //     _mint(to, tokenId);
+    // }
 
-    function burn(uint256 tokenId) external {
-        _burn(tokenId);
-    }
+    // function burn(uint256 tokenId) external {
+    //     _burn(tokenId);
+    // }
 
 
 
