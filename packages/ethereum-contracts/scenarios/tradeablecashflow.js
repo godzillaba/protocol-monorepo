@@ -10,9 +10,9 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     const superTokenAddress = '0x83f8cb4e9901c69D638A4AeF60f533149C459C2a';
     const superFluidAddress = '0x693F0A7ddE866C48D69e7C062e6C9A769f4bf649';
     const cfaAddress = '0xa56bdc9C2e358e41F1005bCE1D04e6437ea4272A';
-    const tcfAddress = '0x21ecE326206bB9119936978BA51f5826c7871550';
+    const tcfAddress = '0x6C2f439150739190f1336D24C3665b5B95eC5a19';
 
-    const [, alice, bob, chuck, dave] = accounts;
+    const [, alice, bob, chuck, dave, eve, frank] = accounts;
     let sf;
     let telContract;
     let telxContract;
@@ -52,12 +52,12 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     })
     
     it("mint TEL to alice", async () => {
-        // return;
+        return;
         await telContract.mint(alice, ethers.BigNumber.from(1e20+""))
     })
 
     it("Alice TEL -> TELx", async () => {
-        // return;
+        return;
         const userAlice = await sf.user({
             address: alice,
             token: superTokenAddress
@@ -85,7 +85,7 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     })
 
     it("Alice creates flow to superapp", async () => {
-        // return;
+        return;
         await telxContract.transfer(tcfAddress, 1e10+'', {from: alice});
         const userAlice = await sf.user({
             address: alice,
@@ -104,7 +104,7 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     
 
     it("Check telx balances", async() => {
-        // return;
+        return;
         await timeMachine.advanceTimeAndBlock(10);
         console.log('alice', await telxContract.balanceOf(alice)-0)
         console.log('bob', await telxContract.balanceOf(bob)-0)
@@ -113,7 +113,11 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
         console.log('superapp', await telxContract.balanceOf(tcfAddress)-0)
     })
 
-    
+    it("set delegators", async () => {
+        // return;
+        let tradeableCashflow = await TradeableCashflow.at(tcfAddress);
+        await tradeableCashflow.setDelegator(eve, 2, {from: alice});
+    })
 
     it("transfer NFT from chuck to dave", async () => {
         // return;
@@ -170,7 +174,7 @@ contract("Scenario: Bob flows to Alice", (accounts) => {
     })
 
     it("Check telx balances", async() => {
-        // return;
+        return;
         await timeMachine.advanceTimeAndBlock(10);
         console.log('alice', await telxContract.balanceOf(alice)-0)
         console.log('bob', await telxContract.balanceOf(bob)-0)
