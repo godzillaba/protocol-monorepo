@@ -1,98 +1,39 @@
-<h1 align="center">Welcome to superfluid protocol-monorepo 👋</h1>
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-<p>
-  <a href="#superfluid-financeethereum-contracts" target="_blank">
-    <img alt="npm" src="https://img.shields.io/npm/v/@superfluid-finance/ethereum-contracts?label=ethereum-contracts">
-  </a>
-  <a href="#superfluid-financejs-sdk" target="_blank">
-    <img alt="npm" src="https://img.shields.io/npm/v/@superfluid-finance/js-sdk?label=js-sdk">
-  </a>
-  <a href="https://twitter.com/Superfluid_HQ/status/" target="_blank">
-    <img alt="Twitter: Superfluid_HQ" src="https://img.shields.io/twitter/follow/Superfluid_HQ.svg?style=social" />
-  </a>
-</p>
+# Streamable Council NFTs
+this repo is forked from the main superfluid repo, this made setting everything up much easier :)
 
-> Contracts and resources for the Superfluid Protocol
+## Relevant code
+`/packages/ethereum-contracts/contracts/superapp/`
 
-### 🏠 [Homepage](https://superfluid.finance)
+## My testing flow
+start `ganache-cli`
+`cd ethereum-contracts`
 
-### ✨ [Superfluid App](https://app.superfluid.finance/)
+### Deploy Superfluid Framework Contracts
+first deploy framework: 
 
-### 📖 [Docs](https://docs.superfluid.finance)
+`RELEASE_VERSION=v1 ENABLE_APP_WHITELISTING=0 NEW_TEST_RESOLVER=1 npx truffle --network development exec scripts/deploy-framework.js`
 
-The Superfluid Protocol is a framework that realizes the real-time finance vision
-where user accounts are connected together, and transactions can happen between
-user accounts instantaneously as a result.
+run the export statement it spits out
 
-This repository implements the superfluid protocol as Ethereum contracts. It also
-contains a Javascript SDK for developing Web3 applications using the superfluid
-protocol.
+then deploy erc20: 
+`npx truffle --network development exec scripts/deploy-test-token.js : TEL`
 
-For technical document, references and tutorials, etc, refer to the
-[docs site](http://docs.superfluid.finance/).
+finally deploy supertoken:
+```
+RELEASE_VERSION=v1 npx truffle --network development \
+exec scripts/deploy-unlisted-super-token.js : \
+<ADDRESS OF ERC20 DEPLOYED IN LAST STEP> \
+SuperTEL \
+TELx
+```
 
-## Packages
+### Start testing
+tests file: `/packages/ethereum-contracts/scenarios/streamableCouncil.js`
 
-#### [`@superfluid-finance/js-sdk`](https://github.com/superfluid-finance/protocol-monorepo/tree/dev/packages/js-sdk)
+fill in `tokenAddress, superTokenAddress, superFluidAddress, cfaAddress` constants using the output of the above commands
 
-<p>
-  <a href="https://www.npmjs.com/package/@superfluid-finance/js-sdk" target="_blank">
-    <img alt="Version" src="https://img.shields.io/npm/v/@superfluid-finance/js-sdk.svg">
-  </a>
-  <a href="#" target="_blank">
-    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
-  </a>
-</p>
+to fill in `superAppAddress`, deploy a new version of `StreamableCouncilNFT.sol`. Go into the tests file, and comment out the return statment in the `deploy superapp` block. Then take the address printed and set `superAppAddress`. re-comment the return statement.
 
-To build with Superfluid, you can use the Javascript SDK package.
+now you may edit the test file as you like. comment/uncomment return statements in `it` blocks to run or not run certain parts of the test. The test will always take a snapshot at the start and revert to it at the end.
 
-#### [`@superfluid-finance/ethereum-contracts`](https://github.com/superfluid-finance/protocol-monorepo/tree/dev/packages/ethereum-contracts)
-<p>
-  <a href="https://www.npmjs.com/package/@superfluid-finance/ethereum-contracts" target="_blank">
-    <img alt="Version" src="https://img.shields.io/npm/v/@superfluid-finance/ethereum-contracts.svg">
-  </a>
-  <a href='https://coveralls.io/github/superfluid-finance/protocol-monorepo?branch=dev'>
-    <img src='https://coveralls.io/repos/github/superfluid-finance/protocol-monorepo/badge.svg?branch=dev' alt='Coverage Status' />
-  </a>
-  <a href="#" target="_blank">
-    <img alt="License: AGPLv3" src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" />
-  </a>
-</p>
-
-If you're interest in peeking under the hood, then check out the contracts package.
-
-## Examples
-
-See [examples/](examples/) for some Superfluid app examples.
-
-## Contributing
-
-Contributions, issues, and feature suggestions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://www.joshua-trujillo.com/"><img src="https://avatars.githubusercontent.com/u/41972979?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Joshua Trujillo</b></sub></a><br /><a href="https://github.com/superfluid-finance/protocol-monorepo/commits?author=JoshuaTrujillo15" title="Code">💻</a></td>
-    <td align="center"><a href="https://manavdarji.notelet.so/"><img src="https://avatars.githubusercontent.com/u/36959497?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Manav Darji</b></sub></a><br /><a href="https://github.com/superfluid-finance/protocol-monorepo/commits?author=manav2401" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/Drewsapple"><img src="https://avatars.githubusercontent.com/u/4532572?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Drew Fisher</b></sub></a><br /><a href="https://github.com/superfluid-finance/protocol-monorepo/commits?author=Drewsapple" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/d10r"><img src="https://avatars.githubusercontent.com/u/5479136?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Didi</b></sub></a><br /><a href="https://github.com/superfluid-finance/protocol-monorepo/commits?author=d10r" title="Code">💻</a></td>
-    <td align="center"><a href="http://medium.com/@samparsky"><img src="https://avatars.githubusercontent.com/u/8148384?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Omidiora Samuel</b></sub></a><br /><a href="https://github.com/superfluid-finance/protocol-monorepo/commits?author=samparsky" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/iamsahu"><img src="https://avatars.githubusercontent.com/u/46891804?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Prafful</b></sub></a><br /><a href="https://github.com/superfluid-finance/protocol-monorepo/commits?author=iamsahu" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/mjaago"><img src="https://avatars.githubusercontent.com/u/25458626?v=4?s=100" width="100px;" alt=""/><br /><sub><b>mjaago</b></sub></a><br /><a href="https://github.com/superfluid-finance/protocol-monorepo/commits?author=mjaago" title="Code">💻</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+you can move the `it` blocks around to test events in different orders.
